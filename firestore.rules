@@ -1,0 +1,92 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    // --- Collection Routes ---
+
+    // 1. Users
+    match /users/{userId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // 2. Amostras
+    match /amostras/{amostraId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // 3. Movimentacoes
+    match /movimentacoes/{movId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // 4. Solicitações
+    match /solicitacoes/{solId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // 5. Protocolos
+    match /protocolos/{prtId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // 6. Recebimentos
+    match /recebimentos/{recId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // 7. Exposições
+    match /exposicoes/{expId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // 8. Conferências
+    match /conferencias/{confId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // 9. Avarias
+    match /avarias/{avId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // 10. Pendências
+    match /pendencias/{pendId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // 11. Logs
+    match /logs/{logId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // 12. Conferencias Importadas
+    match /conferencias_importadas/{confImpId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // 13. Veículos
+    match /veiculos/{veicId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // 14. Motoristas
+    match /motoristas/{motId} {
+      allow read, write: if isSignedIn();
+    }
+
+    // 15. Entradas Pendentes
+    match /entradas_pendentes/{entId} {
+      allow read, write: if isSignedIn();
+    }
+  }
+}

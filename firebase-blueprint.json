@@ -1,0 +1,303 @@
+{
+  "entities": {
+    "User": {
+      "title": "User",
+      "description": "User profile inside the J. Cruzeiro system",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "nome": { "type": "string" },
+        "email": { "type": "string" },
+        "perfil": { "type": "string", "enum": ["Admin", "Controlador", "Separador", "Gerente"] },
+        "cargo": { "type": "string" },
+        "setor": { "type": "string" },
+        "loja": { "type": "string" },
+        "ativo": { "type": "boolean" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" },
+        "lastLogin": { "type": "string" }
+      },
+      "required": ["id", "nome", "email", "perfil", "cargo", "setor", "loja", "ativo", "createdAt", "updatedAt"]
+    },
+    "Amostra": {
+      "title": "Amostra",
+      "description": "A sample item tracked in Central Distribution (CD) and showrooms",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "codigoAdm": { "type": "string" },
+        "descricao": { "type": "string" },
+        "marca": { "type": "string" },
+        "categoria": { "type": "string" },
+        "tamanho": { "type": "string" },
+        "colecao": { "type": "string" },
+        "unidade": { "type": "string" },
+        "saldoAtual": { "type": "number" },
+        "estoqueMinimo": { "type": "number" },
+        "localizacaoCd": { "type": "string" },
+        "status": { "type": "string", "enum": ["ativo", "inativo", "pendente", "avariado"] },
+        "fotoUrl": { "type": "string" },
+        "observacoes": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "codigoAdm", "descricao", "marca", "categoria", "tamanho", "unidade", "saldoAtual", "estoqueMinimo", "status", "createdAt", "updatedAt"]
+    },
+    "MovimentacaoEstoque": {
+      "title": "MovimentacaoEstoque",
+      "description": "Operational change in Central Distribution stock of a sample",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "amostraId": { "type": "string" },
+        "codigoAdm": { "type": "string" },
+        "produtoNome": { "type": "string" },
+        "marca": { "type": "string" },
+        "tipo": { "type": "string", "enum": ["entrada", "saída", "ajuste", "avaria", "devolução"] },
+        "quantidade": { "type": "number" },
+        "saldoAnterior": { "type": "number" },
+        "saldoNovo": { "type": "number" },
+        "lojaDestino": { "type": "string" },
+        "solicitacaoId": { "type": "string" },
+        "protocoloId": { "type": "string" },
+        "verbaCompra": { "type": "string" },
+        "responsavelId": { "type": "string" },
+        "responsavelNome": { "type": "string" },
+        "observacoes": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "amostraId", "codigoAdm", "produtoNome", "marca", "tipo", "quantidade", "saldoAnterior", "saldoNovo", "responsavelId", "responsavelNome", "createdAt"]
+    },
+    "Solicitacao": {
+      "title": "Solicitacao",
+      "description": "Comercial request for sending showroom samples to dynamic stores",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "numero": { "type": "string" },
+        "dataSolicitacao": { "type": "string" },
+        "solicitanteId": { "type": "string" },
+        "solicitanteNome": { "type": "string" },
+        "prioridade": { "type": "string", "enum": ["baixa", "normal", "alta", "urgente"] },
+        "lojasDestino": { "type": "array" },
+        "responsaveisRecebimento": { "type": "object" },
+        "status": { "type": "string" },
+        "observacoes": { "type": "string" },
+        "itens": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "numero", "dataSolicitacao", "solicitanteId", "solicitanteNome", "prioridade", "lojasDestino", "responsaveisRecebimento", "status", "itens", "createdAt", "updatedAt"]
+    },
+    "ProtocoloEnvio": {
+      "title": "ProtocoloEnvio",
+      "description": "System-generated logistics invoice details upon picking confirmation",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "numero": { "type": "string" },
+        "solicitacaoId": { "type": "string" },
+        "solicitacaoNumero": { "type": "string" },
+        "lojaDestino": { "type": "string" },
+        "responsavelSeparacao": { "type": "string" },
+        "responsavelRecebimento": { "type": "string" },
+        "dataEnvio": { "type": "string" },
+        "itens": { "type": "array" },
+        "observacoes": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "numero", "solicitacaoId", "solicitacaoNumero", "lojaDestino", "responsavelSeparacao", "responsavelRecebimento", "dataEnvio", "itens", "createdAt"]
+    },
+    "Recebimento": {
+      "title": "Recebimento",
+      "description": "Branch manager confirmation registry for shipped materials",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "solicitacaoId": { "type": "string" },
+        "solicitacaoNumero": { "type": "string" },
+        "loja": { "type": "string" },
+        "gerenteId": { "type": "string" },
+        "gerenteNome": { "type": "string" },
+        "status": { "type": "string", "enum": ["Recebida", "Recebida parcialmente", "Com divergência"] },
+        "itens": { "type": "array" },
+        "fotos": { "type": "array" },
+        "observacoes": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "solicitacaoId", "solicitacaoNumero", "loja", "gerenteId", "gerenteNome", "status", "itens", "fotos", "createdAt"]
+    },
+    "Exposicao": {
+      "title": "Exposicao",
+      "description": "Branch manager showroom photographic proof of dynamic exhibition",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "solicitacaoId": { "type": "string" },
+        "solicitacaoNumero": { "type": "string" },
+        "amostraId": { "type": "string" },
+        "codigoAdm": { "type": "string" },
+        "descricao": { "type": "string" },
+        "loja": { "type": "string" },
+        "produtoExposto": { "type": "string", "enum": ["sim", "não"] },
+        "localExposicao": { "type": "string" },
+        "integridadeFisica": { "type": "boolean" },
+        "limpezaConservacao": { "type": "boolean" },
+        "identificacaoCorreta": { "type": "boolean" },
+        "localizacaoAdequada": { "type": "boolean" },
+        "fotos": { "type": "array" },
+        "status": { "type": "string" },
+        "observacoes": { "type": "string" },
+        "validadoPor": { "type": "string" },
+        "validatedAt": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "solicitacaoId", "solicitacaoNumero", "amostraId", "codigoAdm", "descricao", "loja", "produtoExposto", "localExposicao", "integridadeFisica", "limpezaConservacao", "identificacaoCorreta", "localizacaoAdequada", "fotos", "status", "createdAt"]
+    },
+    "ConferenciaMensal": {
+      "title": "ConferenciaMensal",
+      "description": "Monthly showroom inspection checklists enforced by controllers",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "competencia": { "type": "string" },
+        "loja": { "type": "string" },
+        "gerenteLoja": { "type": "string" },
+        "gerenteOperacional": { "type": "string" },
+        "status": { "type": "string", "enum": ["Pendente", "Respondida", "Analisada"] },
+        "prazoResposta": { "type": "string" },
+        "itens": { "type": "array" },
+        "fotos": { "type": "array" },
+        "observacoes": { "type": "string" },
+        "enviadoEm": { "type": "string" },
+        "respondidoEm": { "type": "string" },
+        "analisadoEm": { "type": "string" }
+      },
+      "required": ["id", "competencia", "loja", "gerenteLoja", "gerenteOperacional", "status", "prazoResposta", "itens", "fotos"]
+    },
+    "Avaria": {
+      "title": "Avaria",
+      "description": "Damaged goods notification log for physical losses",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "amostraId": { "type": "string" },
+        "codigoAdm": { "type": "string" },
+        "descricao": { "type": "string" },
+        "marca": { "type": "string" },
+        "quantidade": { "type": "number" },
+        "local": { "type": "string", "enum": ["CD", "Loja"] },
+        "loja": { "type": "string" },
+        "responsavelId": { "type": "string" },
+        "responsavelNome": { "type": "string" },
+        "descricaoAvaria": { "type": "string" },
+        "fotos": { "type": "array" },
+        "status": { "type": "string" },
+        "observacoes": { "type": "string" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "amostraId", "codigoAdm", "descricao", "marca", "quantidade", "local", "responsavelId", "responsavelNome", "descricaoAvaria", "fotos", "status", "createdAt", "updatedAt"]
+    },
+    "Pendencia": {
+      "title": "Pendencia",
+      "description": "Operational tickets created automatically to force resolution of gaps",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "tipo": { "type": "string" },
+        "origem": { "type": "string" },
+        "loja": { "type": "string" },
+        "amostraId": { "type": "string" },
+        "codigoAdm": { "type": "string" },
+        "responsavel": { "type": "string" },
+        "prazo": { "type": "string" },
+        "status": { "type": "string" },
+        "observacoes": { "type": "string" },
+        "fotos": { "type": "array" },
+        "historico": { "type": "array" },
+        "createdAt": { "type": "string" },
+        "updatedAt": { "type": "string" }
+      },
+      "required": ["id", "tipo", "origem", "loja", "codigoAdm", "responsavel", "prazo", "status", "historico", "createdAt", "updatedAt"]
+    },
+    "LogAuditoria": {
+      "title": "LogAuditoria",
+      "description": "Systemic audit trail logging actions performed inside GESTÃO E CONTROLE DE AMOSTRAS",
+      "type": "object",
+      "properties": {
+        "id": { "type": "string" },
+        "usuarioId": { "type": "string" },
+        "usuarioNome": { "type": "string" },
+        "acao": { "type": "string" },
+        "modulo": { "type": "string" },
+        "registroId": { "type": "string" },
+        "valorAnterior": { "type": "string" },
+        "valorNovo": { "type": "string" },
+        "observacao": { "type": "string" },
+        "createdAt": { "type": "string" }
+      },
+      "required": ["id", "usuarioId", "usuarioNome", "acao", "modulo", "registroId", "createdAt"]
+    }
+  },
+  "firestore": {
+    "users": {
+      "schema": "User",
+      "description": "Collection of all authorized J. Cruzeiro personnel"
+    },
+    "amostras": {
+      "schema": "Amostra",
+      "description": "Inventory ledger of dynamic showcase tiles and products"
+    },
+    "movimentacoes": {
+      "schema": "MovimentacaoEstoque",
+      "description": "Ledger recording stock counts additions and subtraction"
+    },
+    "solicitacoes": {
+      "schema": "Solicitacao",
+      "description": "Showroom distribution requests"
+    },
+    "protocolos": {
+      "schema": "ProtocoloEnvio",
+      "description": "Dispatched order receipts"
+    },
+    "recebimentos": {
+      "schema": "Recebimento",
+      "description": "In-store confirmation records"
+    },
+    "exposicoes": {
+      "schema": "Exposicao",
+      "description": "Showroom setup verification logs with images"
+    },
+    "conferencias": {
+      "schema": "ConferenciaMensal",
+      "description": "Standard recurring inspection requests"
+    },
+    "avarias": {
+      "schema": "Avaria",
+      "description": "Broken goods and physical losses registrations"
+    },
+    "pendencias": {
+      "schema": "Pendencia",
+      "description": "Open tickets detailing non-compliance of store showrooms"
+    },
+    "logs": {
+      "schema": "LogAuditoria",
+      "description": "Immutably log access levels and record updates"
+    },
+    "conferencias_importadas": {
+      "schema": "ConferenciaMensal",
+      "description": "Checklists/templates imported from Excel spreadsheet"
+    },
+    "veiculos": {
+      "description": "Registered delivery fleet vehicles"
+    },
+    "motoristas": {
+      "description": "Registered delivery team drivers and operators"
+    },
+    "entradas_pendentes": {
+      "schema": "CustomPendingEntry",
+      "description": "Logistical pending entries waiting confirmation and layout validation"
+    }
+  }
+}

@@ -1,0 +1,50 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: 'Inter', ui-sans-serif, system-ui, -apple-system, sans-serif;
+  --font-display: 'Space Grotesk', sans-serif;
+  --font-mono: 'JetBrains Mono', monospace;
+  
+  --color-jc-navy: #0a1d37; /* Dark Blue */
+  --color-jc-blue: #0a1d37; /* Same Dark Blue for consistency */
+  --color-jc-blue-light: #475569; /* Slate 600 representing Gray */
+  --color-jc-red: #dc2626; /* Brand Red */
+  --color-jc-gray: #64748b; /* Slate 500 representing Gray */
+  --color-jc-gold: #dc2626; /* Map legacy gold color to Red for smooth transition */
+  --color-jc-gold-light: #ef4444; /* Map light gold to Red */
+}
+
+/* Custom visual refinements */
+body {
+  font-family: var(--font-sans);
+  background-color: #ffffff; /* Crisp, clean pure white background requested */
+  color: #1e293b;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1, h2, h3, h4, font-display {
+  font-family: var(--font-display);
+}
+
+/* Operational buttons big touch size */
+.btn-operational {
+  min-height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem 1rem;
+  font-weight: 500;
+  border-radius: 0.375rem;
+  transition: all 0.2s;
+}
+
+/* Printable layout styling */
+@media print {
+  .no-print {
+    display: none !important;
+  }
+  .print-only {
+    display: block !important;
+  }
+}

@@ -1,0 +1,215 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Global Safety Net
+    match /{document=**} {
+      allow read, write: if false;
+    }
+
+    // --- Helpers ---
+    function isSignedIn() {
+      return request.auth != null;
+    }
+
+    function isEmailVerified() {
+      return request.auth.token.email_verified == true;
+    }
+
+    function isOwner(userId) {
+      return request.auth.uid == userId;
+    }
+
+    function getRole() {
+      return get(/databases/$(database)/documents/users/$(request.auth.uid)).data.perfil;
+    }
+
+    function isAdmin() {
+      // Allow if marcos.pires or their role is Admin
+      return isSignedIn() && (
+        request.auth.token.email == "marcos.pires@jcruzeiro.com" ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getRole() == "Admin") ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && get(/databases/$(database)/documents/users/$(request.auth.uid)).data.email == "marcos.pires@jcruzeiro.com")
+      );
+    }
+
+    function isControlador() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getRole() == "Controlador";
+    }
+
+    function isSeparador() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getRole() == "Separador";
+    }
+
+    function isGerente() {
+      return isSignedIn() && exists(/databases/$(database)/documents/users/$(request.auth.uid)) && getRole() == "Gerente";
+    }
+
+    function isValidId(id) { 
+      return id is string && id.size() <= 128 && id.matches('^[a-zA-Z0-9_\\-]+$'); 
+    }
+
+    function incoming() { 
+      return request.resource.data; 
+    }
+
+    function existing() { 
+      return resource.data; 
+    }
+
+    // --- Validations ---
+    function isValidUser(data) {
+      return data.keys().hasAll(['id', 'nome', 'email', 'perfil', 'cargo', 'setor', 'loja', 'ativo', 'createdAt', 'updatedAt'])
+        && data.nome is string && data.nome.size() <= 128
+        && data.email is string && data.email.size() <= 128
+        && data.perfil in ['Admin', 'Controlador', 'Separador', 'Gerente']
+        && data.ativo is bool;
+    }
+
+    function isValidAmostra(data) {
+      return data.keys().hasAll(['id', 'codigoAdm', 'descricao', 'marca', 'categoria', 'tamanho', 'unidade', 'saldoAtual', 'estoqueMinimo', 'status', 'createdAt', 'updatedAt'])
+        && data.codigoAdm is string && data.codigoAdm.size() <= 32
+        && data.descricao is string && data.descricao.size() <= 256
+        && data.marca is string && data.marca.size() <= 64
+        && data.saldoAtual is number
+        && data.estoqueMinimo is number
+        && data.status in ['ativo', 'inativo', 'pendente', 'avariado'];
+    }
+
+    function isValidMovimentacao(data) {
+      return data.keys().hasAll(['id', 'amostraId', 'codigoAdm', 'produtoNome', 'marca', 'tipo', 'quantidade', 'saldoAnterior', 'saldoNovo', 'responsavelId', 'responsavelNome', 'createdAt'])
+        && data.amostraId is string
+        && data.tipo in ['entrada', 'saída', 'ajuste', 'avaria', 'devolução']
+        && data.quantidade is number;
+    }
+
+    function isValidSolicitacao(data) {
+      return data.keys().hasAll(['id', 'numero', 'dataSolicitacao', 'solicitanteId', 'solicitanteNome', 'prioridade', 'lojasDestino', 'responsaveisRecebimento', 'status', 'itens', 'createdAt', 'updatedAt'])
+        && data.numero is string
+        && data.prioridade in ['baixa', 'normal', 'alta', 'urgente']
+        && data.lojasDestino is list
+        && data.itens is list;
+    }
+
+    function isValidProtocolo(data) {
+      return data.keys().hasAll(['id', 'numero', 'solicitacaoId', 'solicitacaoNumero', 'lojaDestino', 'responsavelSeparacao', 'responsavelRecebimento', 'dataEnvio', 'itens', 'createdAt'])
+        && data.numero is string
+        && data.solicitacaoId is string;
+    }
+
+    // 6. Recebimentos
+    function isValidRecebimento(data) {
+      return data.keys().hasAll(['id', 'solicitacaoId', 'solicitacaoNumero', 'loja', 'gerenteId', 'gerenteNome', 'status', 'itens', 'fotos', 'createdAt'])
+        && data.status in ['Recebida', 'Recebida parcialmente', 'Com divergência']
+        && data.itens is list;
+    }
+
+    function isValidExposicao(data) {
+      return data.keys().hasAll(['id', 'solicitacaoId', 'solicitacaoNumero', 'amostraId', 'codigoAdm', 'descricao', 'loja', 'produtoExposto', 'localExposicao', 'integridadeFisica', 'limpezaConservacao', 'identificacaoCorreta', 'localizacaoAdequada', 'fotos', 'status', 'createdAt'])
+        && data.solicitacaoId is string
+        && data.fotos is list;
+    }
+
+    function isValidConferencia(data) {
+      return data.keys().hasAll(['id', 'competencia', 'loja', 'gerenteLoja', 'gerenteOperacional', 'status', 'prazoResposta', 'itens', 'fotos'])
+        && data.status in ['Pendente', 'Respondida', 'Analisada']
+        && data.itens is list;
+    }
+
+    function isValidAvaria(data) {
+      return data.keys().hasAll(['id', 'amostraId', 'codigoAdm', 'descricao', 'marca', 'quantidade', 'local', 'responsavelId', 'responsavelNome', 'descricaoAvaria', 'fotos', 'status', 'createdAt', 'updatedAt'])
+        && data.local in ['CD', 'Loja']
+        && data.status in ['Registrada', 'Em análise', 'Aprovada para baixa', 'Reposição solicitada', 'Resolvida'];
+    }
+
+    function isValidPendencia(data) {
+      return data.keys().hasAll(['id', 'tipo', 'origem', 'loja', 'codigoAdm', 'responsavel', 'prazo', 'status', 'historico', 'createdAt', 'updatedAt'])
+        && data.status in ['Aberta', 'Em análise', 'Aguardando loja', 'Aguardando CD', 'Aguardando compras', 'Resolvida', 'Cancelada']
+        && data.historico is list;
+    }
+
+    function isValidLog(data) {
+      return data.keys().hasAll(['id', 'usuarioId', 'usuarioNome', 'acao', 'modulo', 'registroId', 'createdAt'])
+        && data.usuarioId is string
+        && data.acao is string;
+    }
+
+    // --- Collection Routes ---
+
+    // 1. Users
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidUser(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // 2. Amostras
+    match /amostras/{amostraId} {
+      allow read: if isSignedIn();
+      allow create, delete, update: if isSignedIn() && isValidAmostra(incoming());
+    }
+
+    // 3. Movimentacoes
+    match /movimentacoes/{movId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidMovimentacao(incoming());
+      allow update, delete: if false; // Immutable ledger
+    }
+
+    // 4. Solicitações
+    match /solicitacoes/{solId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidSolicitacao(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // 5. Protocolos
+    match /protocolos/{prtId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidProtocolo(incoming());
+      allow update, delete: if false; // Immutable logistics documents
+    }
+
+    // 6. Recebimentos
+    match /recebimentos/{recId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidRecebimento(incoming());
+      allow update, delete: if false;
+    }
+
+    // 7. Exposições
+    match /exposicoes/{expId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidExposicao(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // 8. Conferências
+    match /conferencias/{confId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidConferencia(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // 9. Avarias
+    match /avarias/{avId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidAvaria(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // 10. Pendências
+    match /pendencias/{pendId} {
+      allow read: if isSignedIn();
+      allow create, update: if isSignedIn() && isValidPendencia(incoming());
+      allow delete: if isAdmin();
+    }
+
+    // 11. Logs
+    match /logs/{logId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && isValidLog(incoming());
+      allow update, delete: if false; // Immutable syslog
+    }
+  }
+}
